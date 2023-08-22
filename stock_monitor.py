@@ -33,7 +33,7 @@ def calculate_7_day_average(data):
     closing_prices = [entry['close'] for entry in data[-7:]]
     return sum(closing_prices) / 7
 
-    previous_prices = {}
+previous_prices = {}
 
 # Get stock prices
 stock_prices = get_stock_prices(stock_symbols)
@@ -66,3 +66,13 @@ if alerts:
     print(f"Price alerts triggered for: {', '.join(alerts)}")
 else:
     print("No price alerts triggered.")
+
+def send_notification_to_ifttt(stock_alerts):
+    for symbol in stock_alerts:
+        url = f'https://maker.ifttt.com/trigger/stock_price_alert/with/key/{dPizzX0mkbuY6t15feKsoe}'
+        data = {'value1': f'Alert: Price drop for {symbol}'}
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            print(f"Notification sent for {symbol}")
+        else:
+            print(f"Failed to send notification for {symbol}")
