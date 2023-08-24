@@ -48,7 +48,6 @@ for symbol, price in stock_prices.items():
 """
 This line defines a API request named get_historical_data that takes two parameters: symbol and range for the last 7 days.
 """
-
 def get_historical_data(symbol, range='1m'): #The range parameter specifies the time range for the historical data. It has a default value of '1m', which represents the past month.
     url = f'https://cloud.iexapis.com/stable/stock/{symbol}/chart/{range}?token={API_TOKEN}'
     response = requests.get(url)
@@ -60,7 +59,6 @@ This function calculates the 7 day average using the data from the API get reque
 """
 def calculate_7_day_average(closing_prices):
     return sum(closing_prices) / 7
-
 seven_day_averages = {
     symbol: calculate_7_day_average([entry['close'] for entry in get_historical_data(symbol)[-7:]])
     for symbol in stock_symbols
@@ -91,15 +89,11 @@ def check_price_alerts(current_prices, seven_day_averages, threshold=0.25):
 
     return alerts
 
-
-
-current_prices = get_stock_prices(stock_symbols) # Get current stock prices
-alerts = check_price_alerts(current_prices, seven_day_averages) #Check price alerts
-
-
 """
 This set's a schedule for the script to run every 10 seconds.
 """
+current_prices = get_stock_prices(stock_symbols) # Get current stock prices
+alerts = check_price_alerts(current_prices, seven_day_averages) #Check price alerts
 def run_stock_monitor():
     current_prices = get_stock_prices(stock_symbols)
     seven_day_averages = {
@@ -112,13 +106,12 @@ def run_stock_monitor():
         send_notification_to_ifttt(alerts)
     else:
         print("No price alerts triggered.")
-
     # Update the previous prices dictionary with the current prices and timestamps
     for symbol in stock_symbols:
         previous_prices[symbol]['price'] = current_prices[symbol]
         previous_prices[symbol]['timestamp'] = time.time()
 
-# Schedule the `run_stock_monitor` function to run every 10 seconds
+# Schedule the `run_stock_monitor` function to run every 5 seconds
 schedule.every(5).seconds.do(run_stock_monitor)
 
 # Run the scheduled tasks
