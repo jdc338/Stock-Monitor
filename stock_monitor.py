@@ -11,20 +11,6 @@ stock_symbols = ['TSLA', 'AAPL', 'MSFT', 'GOOGL', 'NKE']
 previous_prices = {symbol: {'price': None, 'timestamp': None} for symbol in stock_symbols}
 
 """
-This function will send alerts to the IFTTT app which will show up as a notification on your
-mobile device
-"""
-def send_notification_to_ifttt(stock_alerts):
-    for symbol in stock_alerts:
-        url = f'https://maker.ifttt.com/trigger/stock_price_alert/with/key/{IFTTT_KEY}'
-        data = {'value1': f'Alert: Price drop for {symbol}'}
-        response = requests.post(url, json=data)
-        if response.status_code == 200:
-            print(f"Notification sent for {symbol}")
-        else:
-            print(f"Failed to send notification for {symbol}")
-
-"""
 Using the IEX API, this function will make a get request for each symbol in the list 'symbols'
 which will be defined in the following line (stock_prices)
 """
@@ -47,7 +33,8 @@ for symbol, price in stock_prices.items():
     print(f'Current price of {symbol}: ${price}')
 
 """
-This line defines a API request named get_historical_data that takes two parameters: symbol and range for the last 7 days.
+This line defines a API request named get_historical_data that takes two parameters: symbol and range for the last month.
+(IEX does not support the 7 day range so we will address this in the following section!)
 """
 def get_historical_data(symbol, range='1m'):
     url = f'https://cloud.iexapis.com/stable/stock/{symbol}/chart/{range}?token={API_TOKEN}'
@@ -64,6 +51,20 @@ seven_day_averages = {
     symbol: calculate_7_day_average([entry['close'] for entry in get_historical_data(symbol)[-7:]])
     for symbol in stock_symbols
 }
+
+"""
+This function will send alerts to the IFTTT app which will show up as a notification on your
+mobile device.
+"""
+def send_notification_to_ifttt(stock_alerts):
+    for symbol in stock_alerts:
+        url = f'https://maker.ifttt.com/trigger/stock_price_alert/with/key/{IFTTT_KEY}'
+        data = {'value1': f'Alert: Price drop for {symbol}'}
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            print(f"Notification sent for {symbol}")
+        else:
+            print(f"Failed to send notification for {symbol}")
 
 """
 This function defines the rule for the alerts. A alert will be triggered if the current price is
